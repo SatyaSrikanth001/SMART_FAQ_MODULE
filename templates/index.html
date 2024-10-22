@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Saras AI Institute Smart FAQ Module</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <style>
+        /* Light Mode (Default) Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #000000;
+        }
+        .dark-mode {
+            background-color: #1a1a2e; 
+            color: #d4d4dc;          
+        }
+        .container {
+            max-width: 1500px;
+            margin-top: 50px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .dark-mode .container {
+            background-color: #2e3b4e; 
+        }
+        .header-title {
+            font-weight: bold;
+            font-size: 2.5rem;
+            text-align: center;
+            color: #34495e;
+        }
+        .dark-mode .header-title {
+            color: #00bcd4;           
+        }
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #7f8c8d;
+        }
+        .dark-mode footer {
+            color: #d4d4dc;         
+        }
+        @media (min-width: 1500px) {
+            .form-section {
+                display: flex;
+                gap: 30px;
+            }
+            #faq-results {
+                flex-grow: 1;
+                margin-left: 30px;
+                width: 50%;
+            }
+        }
+        @media (max-width: 1500px) {
+            .form-section {
+                flex-direction: column;
+            }
+            #faq-results {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+        /* FAQ Results Style */
+        #faq-results .faq-item {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .dark-mode #faq-results .faq-item {
+            background-color: #384859; 
+        }
+        #faq-results .faq-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .faq-item strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .faq-item p {
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        .dark-mode .faq-item p {
+            color: #d4d4dc;         
+        }
+        /******************************** Dark Mode Toggle Button **********************************/
+        .theme-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .dark-mode .form-select, .dark-mode .form-control, .dark-mode .btn {
+            background-color: #2e3b4e;
+            color: #d4d4dc;
+            border: none;
+        }
+        .dark-mode .form-control::placeholder {
+            color: #8aa4af;  /* Softer text for placeholder in dark mode */
+        }
+        .dark-mode .btn-primary {
+            background-color: #00bcd4; /* Cyan for primary buttons */
+            border: none;
+            color: #1a1a2e;
+        }
+        .dark-mode .btn-secondary {
+            background-color: #ffb74d; /* Soft orange for secondary actions */
+            border: none;
+            color: #1a1a2e;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        /* Recent Searches Styles */
+        #recent-search-btn {
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .recent-searches-dropdown {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .recent-search-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .recent-search-item:hover {
+            background-color: #f0f0f0;
+        }
+        .clear-searches-btn {
+            margin-top: 10px;
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header-title mb-4">Saras AI Institute Smart FAQ Module</h1>
+
+        <!-- Dark Mode Toggle -->
+        <div class="theme-toggle">
+            <button id="theme-toggle-btn" class="btn btn-secondary">Switch to Dark Mode</button>
+        </div>
+
+        <div class="form-section">
+            <!-- Form Section -->
+            <form id="faq-form" style="flex: 1;">
+                <div class="mb-3">
+                    <label for="category" class="form-label">Select a Category</label>
+                    <select class="form-select" id="category">
+                        <option value="all">Find in All Categories</option>
+                        <option value="Admissions">Admissions</option>
+                        <option value="Curriculum and Faculty">Curriculum and Faculty</option>
+                        <option value="Accreditation & Recognition">Accreditation & Recognition</option>
+                        <option value="Career Services">Career Services</option>
+                        <option value="Tuition fee and Scholarships">Tuition fee and Scholarships</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="content" class="form-label">Enter Query</label>
+                    <textarea class="form-control" id="content" rows="3" placeholder="Enter query"></textarea>
+                    <p id="error-message" class="error-message" style="display: none;">Please enter a query before submitting.</p>
+                </div>
+                <div class="mb-3">
+                    <label for="question-count" class="form-label">How many FAQs do you need? (Max 5)</label>
+                    <input type="range" class="form-range" id="question-count" min="1" max="5" value="3" oninput="this.nextElementSibling.value = this.value">
+                    <output>3</output>
+                </div>
+                
+                <!-- Recent Searches Button -->
+                <button type="button" id="recent-search-btn" class="btn btn-secondary">Recent Searches</button>
+                <div class="recent-searches-dropdown" id="recent-searches-dropdown"></div>
+
+                <button type="submit" class="btn btn-primary w-100">Generate FAQs</button>
+            </form>
+
+            <!-- FAQ Results Section -->
+            <div id="faq-results" class="mt-4"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Saras AI Institute - Powering the Future with Intelligence</p>
+    </footer>
+
+    <script>
+        // Recent Searches Functionality
+        const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
+        const recentSearchesDropdown = document.getElementById('recent-searches-dropdown');
+        const recentSearchBtn = document.getElementById('recent-search-btn');
+        const contentInput = document.getElementById('content');
+        const errorMessage = document.getElementById('error-message');
+
+        // Populate recent searches dropdown
+        function populateRecentSearches() {
+            recentSearchesDropdown.innerHTML = '';
+            recentSearches.forEach(query => {
+                const searchItem = document.createElement('div');
+                searchItem.classList.add('recent-search-item');
+                searchItem.textContent = query;
+                searchItem.onclick = () => {
+                    contentInput.value = query;
+                    submitForm();
+                };
+                recentSearchesDropdown.appendChild(searchItem);
+            });
+
+            if (recentSearches.length > 0) {
+                const clearButton = document.createElement('button');
+                clearButton.textContent = 'Clear Recent Searches';
+                clearButton.classList.add('clear-searches-btn');
+                clearButton.onclick = () => {
+                    localStorage.removeItem('recentSearches');
+                    recentSearches.length = 0; // Clear the array
+                    populateRecentSearches(); // Update the dropdown
+                };
+                recentSearchesDropdown.appendChild(clearButton);
+            }
+        }
+
+        recentSearchBtn.addEventListener('click', () => {
+            recentSearchesDropdown.style.display = recentSearchesDropdown.style.display === 'block' ? 'none' : 'block';
+            populateRecentSearches();
+        });
+
+        // Handle form submission
+        document.getElementById('faq-form').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (isWindowMaximized()) {
+                    submitForm();
+                }
+            }
+        });
+
+        document.getElementById('faq-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            submitForm();
+        });
+
+        async function submitForm() {
+            const category = document.getElementById('category').value;
+            const content = document.getElementById('content').value.trim();
+            const questionCount = document.getElementById('question-count').value;
+
+            // Validate if content is empty
+            if (!content) {
+                errorMessage.style.display = 'block';
+                return;
+            } else {
+                errorMessage.style.display = 'none'; // Hide error message if query is provided
+            }
+
+            // Add the current query to recent searches if it doesn't exist
+            if (!recentSearches.includes(content)) {
+                recentSearches.push(content);
+                localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            }
+
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: content,
+                    category: category,
+                    top_n: questionCount
+                })
+            });
+
+            const data = await response.json();
+            const resultsContainer = document.getElementById('faq-results');
+            resultsContainer.innerHTML = '';
+
+            if (data.results) {
+                data.results.forEach(faq => {
+                    const faqDiv = document.createElement('div');
+                    faqDiv.classList.add('faq-item');
+                    faqDiv.innerHTML = `
+                        <strong>Category:</strong> <p>${faq.category}</p>
+                        <strong>Question:</strong> <p>${faq.question}</p>
+                        <strong>Answer:</strong> <p>${faq.answer}</p>
+                    `;
+                    resultsContainer.appendChild(faqDiv);
+                });
+            } else {
+                resultsContainer.innerHTML = '<p>No relevant FAQs found.</p>';
+            }
+
+        }
+
+        // Dark Mode Toggle Logic
+        const toggleBtn = document.getElementById('theme-toggle-btn');
+        toggleBtn.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            document.querySelector('.container').classList.toggle('dark-mode');
+            document.querySelectorAll('.faq-item').forEach(item => item.classList.toggle('dark-mode'));
+            
+            // Change button text based on the current mode
+            toggleBtn.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        });
+
+        function isWindowMaximized() {
+            return window.innerWidth >= 900 && window.innerHeight >= 600;
+        }
+
+        // Populate recent searches on initial load
+        populateRecentSearches();
+    </script>
+</body>
+</html>
+
